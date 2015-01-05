@@ -9,7 +9,6 @@ def choose_reply():
 
 def send_reply(values):
   comment = "Sending {0} ButtTips to {1}\n{2}".format(values["amount"], values["to"], choose_reply())
-  print "Hello"
 
 def parse_comment(comment):
   values = {
@@ -18,6 +17,7 @@ def parse_comment(comment):
   }
   send_reply(values)
 
+print "hello"
 for comment in praw.helpers.comment_stream(r, "buttcoin"):
   if re.search("\+[.0-9]* (buttip to [/u])", comment.body, re.IGNORECASE):
     parse_comment(comment.body)
