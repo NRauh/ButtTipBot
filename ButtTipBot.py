@@ -9,7 +9,7 @@ def choose_reply():
 
 def send_reply(values):
   comment = "Sending {0} ButtTips to {1}\n{2}".format(values["amount"], values["to"], choose_reply())
-  print comment
+  print "Hello"
 
 def parse_comment(comment):
   values = {
