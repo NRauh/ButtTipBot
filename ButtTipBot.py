@@ -1,6 +1,10 @@
-import praw, re, random
+import praw, re, random, os
 
 r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
+r.login(os.environ["USERNAME"], os.environ["PASSWORD"])
+if not r.is_logged_in():
+  print "Problem logging in"
+  exit()
 
 def choose_reply():
   with open("replies.txt") as f:
@@ -17,7 +21,6 @@ def parse_comment(comment):
   }
   send_reply(values)
 
-print "hello"
 for comment in praw.helpers.comment_stream(r, "buttcoin"):
   if re.search("\+[.0-9]* (buttip to [/u])", comment.body, re.IGNORECASE):
     parse_comment(comment.body)
