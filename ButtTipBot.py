@@ -21,6 +21,11 @@ def reply_to_comment(comment):
   reply = "Sending {0} ButtTips to {1}\n\n{2}".format(values["amount"], values["to"], choose_reply())
   comment.reply(reply)
 
-for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam"):
-  if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
-    reply_to_comment(comment)
+try:
+  for comment in praw.helpers.comment_stream(r, "buttcoin", limit=None, verbosity=0):
+    if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
+      reply_to_comment(comment)
+except KeyboardInterrupt:
+  r.clear_authentication()
+  print "Logged Out & Ending"
+  pass
