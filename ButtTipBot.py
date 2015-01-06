@@ -22,8 +22,7 @@ def reply_to_comment(comment):
   comment.reply(reply)
 
 try:
-  #for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
-  for comment in r.get_comments("enoughlibrarianspam"):
+  for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
     if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
       reply_to_comment(comment)
 except KeyboardInterrupt:
