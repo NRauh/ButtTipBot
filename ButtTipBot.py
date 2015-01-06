@@ -1,5 +1,6 @@
-import praw, re, random, os
+import praw, re, random, os, traceback, time
 
+print "Starting"
 r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
 r.login(os.environ["USERNAME"], os.environ["PASSWORD"])
 if r.is_logged_in():
@@ -20,12 +21,18 @@ def reply_to_comment(comment):
   }
   reply = "Sending {0} ButtTips to {1}\n\n{2}".format(values["amount"], values["to"], choose_reply())
   comment.reply(reply)
+  print "Sent reply!!!"
 
-try:
-  for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
-    if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
-      reply_to_comment(comment)
-except KeyboardInterrupt:
-  r.clear_authentication()
-  print "Logged Out & Ending"
-  pass
+while True:
+  try:
+    for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
+      if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
+        reply_to_comment(comment)
+  except Exception as e:
+    traceback.print_exc()
+    time.sleep(60)
+    continue
+  except KeyboardInterrupt:
+    r.clear_authentication()
+    print "Logged Out & Ending"
+    pass
