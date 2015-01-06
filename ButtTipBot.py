@@ -53,7 +53,7 @@ def have_replied(comment):
 while True:
   try:
     for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
-      cue = re.search("(\+[.0-9]*) ButtTip to [/u][u/]([A-Z]*)", comment.body, re.IGNORECASE)
+      cue = re.search("(\+[.0-9]*) ButtTip to [/u]+[u/]([A-Z]*)", comment.body, re.IGNORECASE)
       if cue:
         if not have_replied(comment):
           reply = "Sending {0} ButtTips to /u/{1}\n\n{2}".format(cue.group(1), cue.group(2), choose_reply())
