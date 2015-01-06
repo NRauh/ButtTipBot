@@ -2,7 +2,9 @@ import praw, re, random, os
 
 r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
 r.login(os.environ["USERNAME"], os.environ["PASSWORD"])
-if not r.is_logged_in():
+if r.is_logged_in():
+  print "Logged in"
+else:
   print "Problem logging in"
   exit()
 
@@ -11,16 +13,14 @@ def choose_reply():
     replies = f.readlines()
   return random.choice(replies)
 
-def send_reply(values):
-  comment = "Sending {0} ButtTips to {1}\n{2}".format(values["amount"], values["to"], choose_reply())
-
-def parse_comment(comment):
+def reply_to_comment(comment):
   values = {
-    "amount": comment.split()[0],
-    "to": comment.split()[-1]
+    "to": comment.body.split()[-1],
+    "amount": comment.body.split()[0]
   }
-  send_reply(values)
+  reply = "Sending {0} ButtTips to {1}\n\n{2}".format(values["amount"], values["to"], choose_reply())
+  comment.reply(reply)
 
-for comment in praw.helpers.comment_stream(r, "buttcoin"):
-  if re.search("\+[.0-9]* (buttip to [/u])", comment.body, re.IGNORECASE):
-    parse_comment(comment.body)
+for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam"):
+  if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
+    reply_to_comment(comment)
