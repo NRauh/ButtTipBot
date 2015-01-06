@@ -21,20 +21,6 @@ def choose_reply():
 
 
 # Inputs a comment object
-# A dictionary of values is created with to being the last word of the comment,
-# which should be /u/User or u/User, but no checks/preventions force that.
-# Amount is the first word of the comment and will be the +X value.
-# The comment string is then constructed and returned
-# TODO: Need better input handling for getting values
-def build_reply(comment):
-  values = {
-    "to": comment.body.split()[-1],
-    "amount": comment.body.split()[0]
-  }
-  return "Sending {0} ButtTips to {1}\n\n{2}".format(values["amount"], values["to"], choose_reply())
-
-
-# Inputs a comment object
 # done is set to false, then a loop goes over the replies to the comment
 # If the the reply author name is the same as the bot username,
 # then done is set to true and the loop ends. The true/false value of done is returned
@@ -54,12 +40,12 @@ def have_replied(comment):
 # In an infinite loop is created so that errors don't stop the program,
 # and so keyboard interruption ends the infinite for loop better.
 # The for loop goes over each comment as they come
-# An if statement does a regex check between the comment body and tip cue
+# The cue variable which does a regex check between the comment body and tip phrase
 # If a tip is made then an if statement checks it's been replied to or not
 # This is needed because if an error happens (i.e. commenting too much), then
 # it starts the whole loop over, and will fixate on one comment if they're not coming
 # in fast enough. Also it's nice to not reply to the same comment accidentally.
-# Then the comment is built the reply is made.
+# Then the comment is built the reply is made from cue regex groups and choose_reply().
 #
 # In the first exception, traceback is printed to show the error (commented out in prod,
 # because it's going to pretty much always be saying it's posting too much)
@@ -67,12 +53,13 @@ def have_replied(comment):
 while True:
   try:
     for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
-      if re.search("\+[.0-9]* (ButtTip to [/u])", comment.body, re.IGNORECASE):
+      cue = re.search("(\+[.0-9]*) ButtTip to [/u][u/]([A-Z]*)", comment.body, re.IGNORECASE)
+      if cue:
         if not have_replied(comment):
-          print "Trying", comment.permalink
-          comment.reply(build_reply(comment))
+          reply = "Sending {0} ButtTips to /u/{1}\n\n{2}".format(cue.group(1), cue.group(2), choose_reply())
+          comment.reply(reply)
   except Exception as e:
-    traceback.print_exc()
+    #traceback.print_exc()
     time.sleep(60)
     continue
   except KeyboardInterrupt:
