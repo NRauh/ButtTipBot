@@ -1,1 +1,1 @@
-init: python ButtTipBot.py
+web: python ButtTipBot.py
