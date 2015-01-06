@@ -1,4 +1,4 @@
-import praw, re, random
+import praw, re, random, os
 
 print "Starting"
 r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
