@@ -21,31 +21,29 @@ def choose_reply():
 
 
 # Inputs a comment object
-# done is set to false, then a loop goes over the replies to the comment
-# If the the reply author name is the same as the bot username,
-# then done is set to true and the loop ends. The true/false value of done is returned
+# If the comment author name is the same as the username, it returns false (will not reply)
+# If there are replies, a loop goes over them all, and if there is an author,
+# and the author is the username, it returns false
+# If there are no replies, or the replies weren't the username it returns true (will reply)
 #
 # I worry that this method is too resource intensive, and it might be better to use a DB
 # If it is, and by much, someone can tell me and I'll change it
 # However, there's only at most 1000 comments (unless it's multi, then it's 1000*numSubs)
-def have_replied(comment):
-  done = False
-  if comment.author.name != os.environ["USERNAME"]:
+def will_reply(comment):
+  if comment.author.name == os.environ["USERNAME"]:
+    return False
+  if comment.replies:
     for reply in comment.replies:
-      if reply.author.name == os.environ["USERNAME"]:
-        done = True
-        break
-  return done
+      if reply.author and reply.author.name == os.environ["USERNAME"]:
+        return False
+  return True
 
 
 # In an infinite loop is created so that errors don't stop the program,
 # and so keyboard interruption ends the infinite for loop better.
 # The for loop goes over each comment as they come
 # The cue variable which does a regex check between the comment body and tip phrase
-# If a tip is made then an if statement checks it's been replied to or not
-# This is needed because if an error happens (i.e. commenting too much), then
-# it starts the whole loop over, and will fixate on one comment if they're not coming
-# in fast enough. Also it's nice to not reply to the same comment accidentally.
+# If a tip is made then an if statement checks it's should be replied to
 # Then the comment is built the reply is made from cue regex groups and choose_reply().
 #
 # In the first exception, traceback is printed to show the error (commented out in prod,
@@ -56,7 +54,7 @@ while True:
     for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
       cue = re.search("(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
       if cue:
-        if not have_replied(comment):
+        if will_reply(comment):
           reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[[What is Buttcoin?](https://www.youtube.com/watch?v=So50EUl8wbc)][/r/Buttcoin]".format(cue.group(1), cue.group(4), choose_reply())
           comment.reply(reply)
   except Exception as e:
