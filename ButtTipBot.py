@@ -2,13 +2,13 @@ import praw, re, random, os, traceback, time
 
 # Log that the programme is starting, then initialize praw and login to Reddit
 # After trying logging in, the programme logs if it was successful or not
-print "Starting"
+print("Starting")
 r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
 r.login(os.environ["USERNAME"], os.environ["PASSWORD"])
 if r.is_logged_in():
-  print "Logged in", os.environ["USERNAME"]
+  print("Logged in", os.environ["USERNAME"])
 else:
-  print "Problem logging in"
+  print("Problem logging in")
   exit()
 
 
@@ -53,10 +53,10 @@ def have_replied(comment):
 while True:
   try:
     for comment in praw.helpers.comment_stream(r, "buttcoin", limit=None, verbosity=0):
-      cue = re.search("(\+[.0-9]*) ButtTip to [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
+      cue = re.search("(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
       if cue:
         if not have_replied(comment):
-          reply = "Sending {0} ButtTips to /u/{1}\n\n{2}".format(cue.group(1), cue.group(2), choose_reply())
+          reply = "Sending {0} Butts to /u/{1}\n\n{2}".format(cue.group(1), cue.group(4), choose_reply())
           comment.reply(reply)
   except Exception as e:
     #traceback.print_exc()
@@ -64,5 +64,5 @@ while True:
     continue
   except KeyboardInterrupt:
     r.clear_authentication()
-    print "Logged Out & Ending"
+    print("Logged Out & Ending")
     break
