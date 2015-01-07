@@ -4,7 +4,7 @@ ButtTips are essentially worthless, much like Bitcoin tips on Reddit.
 
 All you need to do is put the following in your comment
 <code>
-+Amount ButtTip to /u/User
++Amount Butts to /u/User
 </code>
 Where `Amount` is a number (whole or decimal), and `User` is the user you're tipping.
 
