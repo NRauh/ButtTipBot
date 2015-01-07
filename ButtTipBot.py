@@ -52,7 +52,7 @@ def have_replied(comment):
 # Then the program sleeps for a minute, again because it'll just be posting too much
 while True:
   try:
-    for comment in praw.helpers.comment_stream(r, "enoughlibrarianspam", limit=None, verbosity=0):
+    for comment in praw.helpers.comment_stream(r, "buttcoin", limit=None, verbosity=0):
       cue = re.search("(\+[.0-9]*) ButtTip to [/u]+[u/]([A-Z]*)", comment.body, re.IGNORECASE)
       if cue:
         if not have_replied(comment):
