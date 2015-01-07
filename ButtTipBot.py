@@ -60,7 +60,7 @@ while True:
           reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[[What is Buttcoin?](https://www.youtube.com/watch?v=So50EUl8wbc)][/r/Buttcoin]".format(cue.group(1), cue.group(4), choose_reply())
           comment.reply(reply)
   except Exception as e:
-    traceback.print_exc()
+    #traceback.print_exc()
     time.sleep(60)
     continue
   except KeyboardInterrupt:
