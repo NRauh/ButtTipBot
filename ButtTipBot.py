@@ -56,7 +56,7 @@ while True:
       cue = re.search("(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
       if cue:
         if not have_replied(comment):
-          reply = "Sending {0} Butts to /u/{1}\n\n{2}".format(cue.group(1), cue.group(4), choose_reply())
+          reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[[What is Buttcoin?](https://www.youtube.com/watch?v=So50EUl8wbc)][/r/Buttcoin]".format(cue.group(1), cue.group(4), choose_reply())
           comment.reply(reply)
   except Exception as e:
     #traceback.print_exc()
