@@ -12,12 +12,11 @@ else:
   exit()
 
 
-# Loads each line from the replies file into a list
-# Then randomly chooses one and returns it as a string
-def choose_reply():
-  with open("replies.txt") as f:
-    replies = f.readlines()
-  return random.choice(replies)
+# Load up a list of possible replies, and video links
+with open("replies.txt") as f:
+  replies = f.readlines()
+with open("videos.txt") as f:
+  videos = f.readlines()
 
 
 # Inputs a comment object
@@ -51,11 +50,11 @@ def will_reply(comment):
 # Then the program sleeps for a minute, again because it'll just be posting too much
 while True:
   try:
-    for comment in praw.helpers.comment_stream(r, "buttcoin", limit=None, verbosity=0):
+    for comment in praw.helpers.comment_stream(r, "buttcoin+enoughlibertarianspam", limit=None, verbosity=0):
       cue = re.search("(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
       if cue:
         if will_reply(comment):
-          reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[What is Buttcoin?](https://www.youtube.com/watch?v=So50EUl8wbc) | /r/Buttcoin".format(cue.group(1), cue.group(4), choose_reply())
+          reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[What is Buttcoin?]({3}) | /r/Buttcoin".format(cue.group(1), cue.group(4), random.choice(replies), random.choice(videos))
           comment.reply(reply)
   except Exception as e:
     #traceback.print_exc()
