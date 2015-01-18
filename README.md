@@ -8,14 +8,14 @@ All you need to do is put the following in your comment
 </code>
 Where `Amount` is a number (whole or decimal), and `User` is the user you're tipping.
 
-This should be able to be added anywhere in your comment, is case insensitive, /u/ can be u/, and if the amount is less than one it doesn't need a zero infront of it.
+This should be able to be added anywhere in your comment, is case insensitive, /u/ can be u/, and if the amount is less than one it doesn't need a zero in front of it.
 
-When the bot sees an occurance of the tip, it replies to tell the tipper that the ButtTip was sent, and adds a bit of motivation.
+When the bot sees an occurrence of the tip, it replies to tell the tipper that the ButtTip was sent, and adds a bit of motivation.
 
 ##Contributing
 If you've noticed a bug report it through GitHub, or complain enough on Reddit so I see it.
 
-You can also contribute by adding a reply to `replies.txt`, which can be edited through GitHub. Replies should end with an exclamation mark (even if it has a question mark). You can use Reddit formatting, but you can't use multiple lines in the txt file (if you want to make a new line, type `\n`). Your replies should exist as a satire towards Bitcoin, and will need to be approved before it's actually added.
+You can also contribute by adding a reply to `replies.txt` or a video link to `videos.txt`, which can be edited through GitHub. Replies should end with an exclamation mark (even if it has a question mark). You can use Reddit formatting, but you can't use multiple lines in the txt file (if you want to make a new line, type `\n`). Your replies should exist as a satire towards Bitcoin, and will need to be approved before it's actually added. Videos just need to be a bizarre sort of funny.
 
 ##License
 This is free and unencumbered software released into the public domain.
