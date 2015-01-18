@@ -1,1 +1,1 @@
-web: python ButtTipBot.py
+worker: python ButtTipBot.py
