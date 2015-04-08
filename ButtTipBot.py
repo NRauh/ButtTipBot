@@ -1,66 +1,133 @@
-import praw, re, random, os, traceback, time
+import logging
+import praw
+import re
+import random
+import os
+import traceback
+import time
 
-# Log that the programme is starting, then initialize praw and login to Reddit
-# After trying logging in, the programme logs if it was successful or not
-print("Starting")
-r = praw.Reddit("A bot to send butt tips to users by /u/Natatos")
-r.login(os.environ["USERNAME"], os.environ["PASSWORD"])
-if r.is_logged_in():
-  print("Logged in", os.environ["USERNAME"])
-else:
-  print("Problem logging in")
-  exit()
+# HTTP errors (when reddit inevitably fails) and connection errors
+from requests.exceptions import ConnectionError, HTTPError
+# PRAW exceptions
+from praw.errors import APIException, ClientException, RateLimitExceeded
 
+
+SUBREDDIT = "buttcoin+enoughlibertarianspam"
+REPLIES = []
+VIDEOS = []
+COMMENT = "Sending {0} Butts to /u/{1}\n\n{2}[What is Buttcoin?]({3}) | /r/Buttcoin"
+DEBUG = os.environ.get("DEBUG", "false") == "true"
+
+USER_AGENT = "ButtTipBot v0.3 by /u/Natatos"
+
+loglvl = logging.DEBUG if DEBUG else logging.INFO
+
+logging.basicConfig(level=loglvl,
+                    format='[%(asctime)s] [%(levelname)s] %(message)s')
+
+log = logging.getLogger("butttipper")
+logging.getLogger("requests").setLevel(loglvl)
+
+# Create reddit object. Wait until initalization of ButtTipper to login
+r = praw.Reddit(USER_AGENT)
+
+# Change the amount randomly by a few orders of magnitude
+def get_amount(original):
+    oamt = float(original)
+    i = 0
+    magnitude = random.randint(0, 3)
+    multiply = bool(random.getrandbits(1))
+    while i < magnitude:
+        if multiply:
+            oamt *= 10.0
+        else:
+            oamt /= 10.0
+        i += 1
+    return oamt
 
 # Load up a list of possible replies, and video links
-with open("replies.txt") as f:
-  replies = f.readlines()
-with open("videos.txt") as f:
-  videos = f.readlines()
+def load_reply_data():
+    global REPLIES
+    global VIDEOS
+    f = open("replies.txt", "r")
+    REPLIES = f.readlines()
+    f.close()
+    f = open("videos.txt", "r")
+    VIDEOS = f.readlines()
+    f.close()
+
+RECOVERABLE = (ConnectionError, HTTPError, APIException, ClientException, RateLimitExceeded)
 
 
-# Inputs a comment object
-# If the comment author name is the same as the username, it returns false (will not reply)
-# If there are replies, a loop goes over them all, and if there is an author,
-# and the author is the username, it returns false
-# If there are no replies, or the replies weren't the username it returns true (will reply)
-#
-# I worry that this method is too resource intensive, and it might be better to use a DB
-# If it is, and by much, someone can tell me and I'll change it
-# However, there's only at most 1000 comments (unless it's multi, then it's 1000*numSubs)
-def will_reply(comment):
-  if comment.author.name == os.environ["USERNAME"]:
-    return False
-  if comment.replies:
-    for reply in comment.replies:
-      if reply.author and reply.author.name == os.environ["USERNAME"]:
+class ButtTipper:
+    def __init__(self, username, password, limit=2000):
+        self.username = username
+        self.password = password
+        self.limit = limit
+        self._setup = False
+        self.already_done = []
+
+    def run(self):
+        if not self._setup:
+            raise Exception("ButtTipper Bot has not been setup yet")
+
+        log.info("Checking comments...")
+        comments = praw.helpers.comment_stream(r, SUBREDDIT, limit=self.limit)
+        for c in comments:
+            cue = re.search(
+                "(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)",
+                c.body, re.IGNORECASE)
+            if cue and self.will_reply(c):
+                c.reply(COMMENT.format(get_amount(cue.group(1)), cue.group(4),
+                        random.choice(REPLIES), random.choice(VIDEOS)))
+
+    def will_reply(self, comment):
+        if comment.id in self.already_done:
+            return False
+        if comment.author and comment.author.name == self.username:
+            self.already_done.append(comment.id)
+        elif comment.replies:
+            for reply in comment.replies:
+                if reply.author and reply.author.name == self.username:
+                    self.already_done.append(comment.id)
+                else:
+                    return True
         return False
-  return True
 
 
-# In an infinite loop is created so that errors don't stop the program,
-# and so keyboard interruption ends the infinite for loop better.
-# The for loop goes over each comment as they come
-# The cue variable which does a regex check between the comment body and tip phrase
-# If a tip is made then an if statement checks it's should be replied to
-# Then the comment is built the reply is made from cue regex groups and choose_reply().
-#
-# In the first exception, traceback is printed to show the error (commented out in prod,
-# because it's going to pretty much always be saying it's posting too much)
-# Then the program sleeps for a minute, again because it'll just be posting too much
-while True:
-  try:
-    for comment in praw.helpers.comment_stream(r, "buttcoin+enoughlibertarianspam", limit=None, verbosity=0):
-      cue = re.search("(\+[.0-9]*) (ButtTip|butt|buttcoin)s? ?(to|for)? [/u]+[u/]([A-Z0-9_\-]*)", comment.body, re.IGNORECASE)
-      if cue:
-        if will_reply(comment):
-          reply = "Sending {0} Butts to /u/{1}\n\n{2}\n\n[What is Buttcoin?]({3}) | /r/Buttcoin".format(cue.group(1), cue.group(4), random.choice(replies), random.choice(videos))
-          comment.reply(reply)
-  except Exception as e:
-    #traceback.print_exc()
-    time.sleep(60)
-    continue
-  except KeyboardInterrupt:
-    r.clear_authentication()
-    print("Logged Out & Ending")
-    break
+    def setup(self):
+        self._login()
+        self._setup = True
+
+    def quit(self):
+        r.clear_authentication()
+        self._setup = False
+        log.info("Forever hold your butts; shutting down.")
+
+    def _login(self):
+        r.login(self.username, self.password)
+        if not r.is_logged_in():
+            raise Exception("Not logged in; authentication error?")
+        log.info("Logged in to reddit")
+
+
+if __name__ == "__main__":
+    load_reply_data()
+
+    username = os.environ.get("USERNAME")
+    password = os.environ.get("PASSWORD")
+    wait = int(os.environ.get("WAIT", 20))
+    limit = int(os.environ.get("LIMIT", 2000))
+
+    bot = ButtTipper(username, password, limit)
+    bot.setup()
+
+    try:
+        while True:
+            try:
+                bot.run()
+            except RECOVERABLE as e:
+                log.error(traceback.format_exc())
+            time.sleep(wait)
+    except KeyboardInterrupt:
+        bot.quit()
