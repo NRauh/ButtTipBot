@@ -12,6 +12,8 @@ This should be able to be added anywhere in your comment, is case insensitive, /
 
 When the bot sees an occurrence of the tip, it replies to tell the tipper that the ButtTip was sent, and adds a bit of motivation.
 
+Massive thanks to justcool393 for cleaning up (rewriting all but some whitespace) the original code!
+
 ##Contributing
 If you've noticed a bug report it through GitHub, or complain enough on Reddit so I see it.
 
