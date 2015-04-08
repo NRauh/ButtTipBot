@@ -1,3 +1,13 @@
-*.swo
-*.swp
-.DS_Store
+.swp
+.swo
+
+#Other files
+Procfile
+requirements.txt
+*.log
+.env
+/bin
+/share
+/lib
+/__pycache__
+settings.pyc
